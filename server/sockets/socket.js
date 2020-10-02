@@ -4,7 +4,7 @@ const { Usuarios } = require('../classes/usuarios');
 
 const usuarios = new Usuarios();
 
-const { crearMensaje } = require('../utilidades/utilidades');
+const { crearMensaje, crearMensajePrivado } = require('../utilidades/utilidades');
 
 
 io.on('connection', (client) => {
@@ -24,17 +24,21 @@ io.on('connection', (client) => {
 
         client.broadcast.to(usuario.sala).emit('listaPersona', usuarios.getPersonaPorSala(usuario.sala));
 
+        client.broadcast.to(usuario.sala).emit('crearMensaje', crearMensaje('Administrador', `${usuario.nombre} entró al chat.`));
+
         callback(usuarios.getPersonaPorSala(usuario.sala));
 
     });
 
-    client.on('crearMensaje', (data) => {
+    client.on('crearMensaje', (data, callback) => {
 
         let persona = usuarios.getPersona(client.id);
 
         let mensaje = crearMensaje(persona.nombre, data.mensaje);
 
         client.broadcast.to(persona.sala).emit('crearMensaje', mensaje);
+
+        callback(mensaje);
 
     });
 
@@ -48,11 +52,15 @@ io.on('connection', (client) => {
 
     });
 
-    client.on('mensajePrivado', (data) => {
+    client.on('mensajePrivado', (data, callback) => {
 
         let persona = usuarios.getPersona(client.id);
 
-        client.broadcast.to(data.para).emit('mensajePrivado', crearMensaje(persona.nombre, data.mensaje));
+        let mensaje = crearMensajePrivado(data.id, persona.nombre, data.mensaje, client.id);
+
+        client.broadcast.to(data.id).emit('mensajePrivado', mensaje);
+
+        callback(mensaje);
 
     });
 

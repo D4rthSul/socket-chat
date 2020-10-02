@@ -8,6 +8,19 @@ const crearMensaje = (nombre, mensaje) => {
 
 };
 
+const crearMensajePrivado = (id, nombre, mensaje, persona) => {
+
+    return {
+        id,
+        nombre,
+        mensaje,
+        persona,
+        fecha: new Date().getTime()
+    };
+
+};
+
 module.exports = {
-    crearMensaje
+    crearMensaje,
+    crearMensajePrivado
 }
